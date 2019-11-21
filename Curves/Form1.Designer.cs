@@ -92,12 +92,13 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.zedGraphControl1.AutoScroll = true;
             this.zedGraphControl1.AutoSize = true;
+            this.zedGraphControl1.EditModifierKeys = System.Windows.Forms.Keys.None;
+            this.zedGraphControl1.IsAntiAlias = true;
             this.zedGraphControl1.IsAutoScrollRange = true;
+            this.zedGraphControl1.IsEnableHEdit = true;
+            this.zedGraphControl1.IsEnableVEdit = true;
             this.zedGraphControl1.IsShowHScrollBar = true;
             this.zedGraphControl1.IsShowVScrollBar = true;
-            this.zedGraphControl1.IsSynchronizeXAxes = true;
-            this.zedGraphControl1.IsSynchronizeYAxes = true;
-            this.zedGraphControl1.IsZoomOnMouseCenter = true;
             this.zedGraphControl1.Location = new System.Drawing.Point(12, 32);
             this.zedGraphControl1.Name = "zedGraphControl1";
             this.zedGraphControl1.ScrollGrace = 0D;
@@ -110,6 +111,10 @@
             this.zedGraphControl1.Size = new System.Drawing.Size(984, 418);
             this.zedGraphControl1.TabIndex = 5;
             this.zedGraphControl1.UseExtendedPrintDialog = true;
+            this.zedGraphControl1.MouseDownEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.zedGraphControl1_MouseDownEvent);
+            this.zedGraphControl1.MouseUpEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.zedGraphControl1_MouseUpEvent);
+            this.zedGraphControl1.MouseMoveEvent += new ZedGraph.ZedGraphControl.ZedMouseEventHandler(this.zedGraphControl1_MouseMoveEvent);
+            this.zedGraphControl1.Click += new System.EventHandler(this.zedGraphControl1_Click);
             // 
             // Form1
             // 

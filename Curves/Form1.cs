@@ -12,10 +12,27 @@ namespace Curves
 {
     public partial class Form1 : Form
     {
+
         public Form1()
         {
             InitializeComponent();
+            GraphPane pane = zedGraphControl1.GraphPane;
+            {
+                pane.XAxis.IsVisible = true;
+                GridSet(pane.XAxis.MajorGrid, true, 5, 10);
+                GridSet(pane.XAxis.MinorGrid, true, 1, 2);
+            }
         }
+
+        public static MinorGrid GridSet(MinorGrid dest, bool isVisible, int dashOn, int dashOff)
+        {
+            dest.IsVisible = true;
+            dest.DashOn = dashOn;
+            dest.DashOff = dashOff;
+            return dest;
+        }
+
+
 
         static string[] ColourValues = new string[] 
         {
@@ -55,7 +72,6 @@ namespace Curves
                     double y = double.Parse(values[j], CultureInfo.InvariantCulture);
                     lists[j-1].Add(depth, y);
                 }
-                
             }
 
             pane.YAxisList.Clear(); // Удалим существующие оси Y
@@ -102,6 +118,102 @@ namespace Curves
                     MessageBox.Show( ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void zedGraphControl1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        double x0 = -1;
+        double y0 = -1;
+        int curveIndex = -1;    // Номер кривой, ближайшей к точке клика
+        int pointIndex = -1;    // Номер точки кривой, ближайшей к точке клика
+        double ymin_limit = -1;
+        double ymax_limit = -1;
+        double xmin_limit = -1;
+        double xmax_limit = -1;
+
+        double ymax_limit0 = -1;
+        double ymin_limit0 = -1;
+
+        bool mouseDown = false;
+
+
+        private bool zedGraphControl1_MouseDownEvent(ZedGraphControl sender, MouseEventArgs e)
+        {
+            // Сюда будет сохранена кривая, рядом с которой был произведен клик
+            CurveItem curve;
+            
+
+            GraphPane pane = zedGraphControl1.GraphPane;
+
+            // Максимальное расстояние от точки клика до кривой в пикселях,
+            // при котором еще считается, что клик попал в окрестность кривой.
+            GraphPane.Default.NearestTol = 10;
+            Point eventPoint = new Point(e.X, e.Y);
+            int a = eventPoint.X;
+            int b = eventPoint.Y;
+            bool result = pane.FindNearestPoint(e.Location, out curve, out pointIndex);
+            if (result)
+            {
+                pane.ReverseTransform(new PointF(e.X, e.Y), out x0, out y0);
+                mouseDown = true;
+                int n = Convert.ToInt32(N_tb.Text);
+                for (int i = 0; i < n; ++i)
+                {
+                    if (curve == zedGraphControl1.GraphPane.CurveList[i])
+                    {
+                        curveIndex = i;
+                        ymin_limit = zedGraphControl1.GraphPane.YAxisList[i].Scale.Min;
+                        ymax_limit = zedGraphControl1.GraphPane.YAxisList[i].Scale.Max;
+
+                        xmin_limit = zedGraphControl1.GraphPane.XAxis.Scale.Min;
+                        xmax_limit = zedGraphControl1.GraphPane.XAxis.Scale.Max;
+                        ymin_limit0 = zedGraphControl1.GraphPane.YAxisList[0].Scale.Min;
+                        ymax_limit0 = zedGraphControl1.GraphPane.YAxisList[0].Scale.Max;
+                        break;
+                    }
+                }
+                
+            }
+            return true;
+        }
+
+        private bool zedGraphControl1_MouseMoveEvent(ZedGraphControl sender, MouseEventArgs e)
+        {
+            
+            return true;
+        }
+
+        private bool zedGraphControl1_MouseUpEvent(ZedGraphControl sender, MouseEventArgs e)
+        {
+            if (mouseDown)
+            {
+                GraphPane pane = zedGraphControl1.GraphPane;
+                double x;
+                double y;
+                pane.ReverseTransform(new PointF(e.X, e.Y), out x, out y);
+                double x1 = x - x0;
+                double y1 = y - y0;
+                int m = Convert.ToInt32(M_tb.Text);
+                double k = (ymax_limit - ymin_limit) / (ymax_limit0 - ymin_limit0);
+
+                for (int i = 0; i < m; ++i)
+                {
+                    zedGraphControl1.GraphPane.CurveList[curveIndex].Points[i].X += x1;
+                    zedGraphControl1.GraphPane.CurveList[curveIndex].Points[i].Y += y1 * k;   // k - множитель для сопоставления осей y
+                }
+                zedGraphControl1.GraphPane.YAxisList[curveIndex].Scale.Min = ymin_limit;
+                zedGraphControl1.GraphPane.YAxisList[curveIndex].Scale.Max = ymax_limit;
+                zedGraphControl1.GraphPane.XAxis.Scale.Min = xmin_limit;
+                zedGraphControl1.GraphPane.XAxis.Scale.Max = xmax_limit;
+
+                zedGraphControl1.AxisChange();
+                zedGraphControl1.Invalidate();
+            }
+            mouseDown = false;
+            return true;
         }
     }
 }
