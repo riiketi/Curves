@@ -92,6 +92,8 @@ namespace Curves
 
             zedGraphControl1.AxisChange();
             zedGraphControl1.Invalidate();
+            CurveNum_tb.Enabled = true;
+            DotCount_tb.Enabled = true;
         }
 
         private void Browse_btn_Click(object sender, EventArgs e)
@@ -215,6 +217,66 @@ namespace Curves
             }
             mouseDown = false;
             return true;
+        }
+
+        private void Smoothing_btn_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int ind = Convert.ToInt32(CurveNum_tb.Text) - 1;    // Индекс кривой
+                int k = Convert.ToInt32(DotCount_tb.Text);      // Размер окна
+                if (k % 2 == 1)
+                {
+                    int a = k / 2;
+                    int b = Convert.ToInt32(M_tb.Text) - k / 2;
+                    for (int i = a; i < b; ++i)
+                    {
+                        double sumX = 0;
+                        double sumY = 0;
+                        for (int j = i - (k / 2); j <= i + (k / 2); ++j)
+                        {
+                            sumX += zedGraphControl1.GraphPane.CurveList[ind].Points[j].X;
+                            sumY += zedGraphControl1.GraphPane.CurveList[ind].Points[j].Y;
+                        }
+                        zedGraphControl1.GraphPane.CurveList[ind].Points[i].X = sumX / k;
+                        zedGraphControl1.GraphPane.CurveList[ind].Points[i].Y = sumY / k;
+                    }
+                    zedGraphControl1.AxisChange();
+                    zedGraphControl1.Invalidate();
+                }
+                else
+                {
+                    MessageBox.Show("Число k должно быть нечётным!", "Неверное число k!", MessageBoxButtons.OK);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Убедитесь, что введённые значения верны", "Ошибка!", MessageBoxButtons.OK);
+            }
+        }
+
+        private void CurveNum_tb_TextChanged(object sender, EventArgs e)
+        {
+            if (DotCount_tb.Text.Trim() == "")
+            {
+                Smoothing_btn.Enabled = false;
+            }
+            else
+            {
+                Smoothing_btn.Enabled = true;
+            }
+        }
+
+        private void DotCount_tb_TextChanged(object sender, EventArgs e)
+        {
+            if (CurveNum_tb.Text.Trim() == "")
+            {
+                Smoothing_btn.Enabled = false;
+            }
+            else
+            {
+                Smoothing_btn.Enabled = true;
+            }
         }
     }
 }
