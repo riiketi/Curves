@@ -84,6 +84,7 @@ namespace Curves
                 myCurves.Add(pane.AddCurve("Curve " + (j + 1), lists[j], ColorTranslator.FromHtml(ColourValues[j]), SymbolType.None));
                 myCurves[j].YAxisIndex = axis[j];
                 pane.YAxisList[axis[j]].Title.FontSpec.FontColor = ColorTranslator.FromHtml(ColourValues[j]);
+                pane.YAxisList[axis[j]].MajorGrid.IsZeroLine = false;
             }
 
             pane.Legend.IsVisible = false;
@@ -152,8 +153,6 @@ namespace Curves
             // при котором еще считается, что клик попал в окрестность кривой.
             GraphPane.Default.NearestTol = 10;
             Point eventPoint = new Point(e.X, e.Y);
-            int a = eventPoint.X;
-            int b = eventPoint.Y;
             bool result = pane.FindNearestPoint(e.Location, out curve, out pointIndex);
             if (result)
             {
@@ -198,17 +197,19 @@ namespace Curves
                 double y1 = y - y0;
                 int m = Convert.ToInt32(M_tb.Text);
                 double k = (ymax_limit - ymin_limit) / (ymax_limit0 - ymin_limit0);
+                zedGraphControl1.GraphPane.YAxisList[curveIndex].Scale.Min -= y1 * k;
+                zedGraphControl1.GraphPane.YAxisList[curveIndex].Scale.Max -= y1 * k;
 
+                /*
                 for (int i = 0; i < m; ++i)
                 {
                     zedGraphControl1.GraphPane.CurveList[curveIndex].Points[i].X += x1;
                     zedGraphControl1.GraphPane.CurveList[curveIndex].Points[i].Y += y1 * k;   // k - множитель для сопоставления осей y
                 }
-                zedGraphControl1.GraphPane.YAxisList[curveIndex].Scale.Min = ymin_limit;
-                zedGraphControl1.GraphPane.YAxisList[curveIndex].Scale.Max = ymax_limit;
+                
                 zedGraphControl1.GraphPane.XAxis.Scale.Min = xmin_limit;
                 zedGraphControl1.GraphPane.XAxis.Scale.Max = xmax_limit;
-
+                */
                 zedGraphControl1.AxisChange();
                 zedGraphControl1.Invalidate();
             }
